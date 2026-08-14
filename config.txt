@@ -1,0 +1,830 @@
+R3-DHCP
+
+enable
+configure terminal
+
+hostname R3-DHCP
+no ip domain-lookup
+
+enable secret Class123
+
+username Admin secret Cisco123
+
+banner motd # ACCESO DENEGADO ANNIFER CARRASCO ORTIZ 20252648 SOLO PERSONAL AUTORIZADO #
+
+service password-encryption
+
+line console 0
+login local
+exec-timeout 10
+exit
+
+line vty 0 4
+login local
+exec-timeout 10
+transport input ssh
+exit
+
+ip domain-name campus.com
+ip ssh version 2
+crypto key generate rsa
+1024
+
+interface gigabitEthernet0/0/0
+description CONECTADO A R1
+ip address 26.48.75.101 255.255.255.252
+no shutdown
+exit
+
+interface gigabitEthernet0/1/0
+description CONECTADO A R2
+ip address 26.48.75.105 255.255.255.252
+no shutdown
+exit
+
+interface gigabitEthernet0/2/0
+description CONECTADO A SWC1
+ip address 26.48.75.97 255.255.255.252
+no shutdown
+exit
+
+interface gigabitEthernet0/3/0
+description CONECTADO AL ISP
+ip address 209.165.200.225 255.255.255.248
+no shutdown
+exit
+
+ip dhcp excluded-address 26.48.74.129
+ip dhcp excluded-address 26.48.74.250 26.48.74.254
+
+ip dhcp pool VLAN2-SERVIDORES
+network 26.48.74.128 255.255.255.128
+default-router 26.48.74.129
+dns-server 26.48.74.131
+exit
+
+ip dhcp excluded-address 26.48.74.1
+ip dhcp excluded-address 26.48.74.250 26.48.74.254
+
+ip dhcp pool VLAN3-EMPLEADOS
+network 26.48.74.0 255.255.255.128
+default-router 26.48.74.1
+dns-server 26.48.74.131
+exit
+
+ip dhcp excluded-address 26.48.75.1
+ip dhcp excluded-address 26.48.75.28 26.48.75.30
+
+ip dhcp pool VLAN4-FINANZAS
+network 26.48.75.0 255.255.255.224
+default-router 26.48.75.1
+dns-server 26.48.74.131
+exit
+
+ip dhcp excluded-address 26.48.75.65
+ip dhcp excluded-address 26.48.75.92 26.48.75.94
+
+ip dhcp pool VLAN5-TI
+network 26.48.75.64 255.255.255.224
+default-router 26.48.75.65
+dns-server 26.48.74.131
+exit
+
+ip dhcp excluded-address 26.48.72.1
+ip dhcp excluded-address 26.48.73.250 26.48.73.254
+
+ip dhcp pool VLAN6-WIFI
+network 26.48.72.0 255.255.254.0
+default-router 26.48.72.1
+dns-server 26.48.74.131
+exit
+
+ip dhcp excluded-address 26.48.64.1
+ip dhcp excluded-address 26.48.64.2 26.48.64.3
+
+ip dhcp pool VLAN300
+network 26.48.64.0 255.255.248.0
+default-router 26.48.64.1
+dns-server 26.48.74.131
+exit
+
+ip dhcp excluded-address 26.48.75.33
+ip dhcp excluded-address 26.48.75.34 26.48.75.35
+
+ip dhcp pool VLAN500
+network 26.48.75.32 255.255.255.224
+default-router 26.48.75.33
+dns-server 26.48.74.131
+exit
+
+ip route 26.48.74.128 255.255.255.128 26.48.75.98
+ip route 26.48.74.0 255.255.255.128 26.48.75.98
+ip route 26.48.75.0 255.255.255.224 26.48.75.98
+ip route 26.48.75.64 255.255.255.224 26.48.75.98
+ip route 26.48.72.0 255.255.254.0 26.48.75.98
+
+ip route 26.48.75.32 255.255.255.224 26.48.75.102
+ip route 26.48.64.0 255.255.248.0 26.48.75.102
+
+ip route 0.0.0.0 0.0.0.0 209.165.200.228
+
+ip dhcp excluded-address 192.168.72.1
+ip dhcp excluded-address 192.168.72.2 192.168.72.10
+
+ip dhcp pool VLAN7-WLC-AP
+ network 192.168.72.0 255.255.254.0
+ default-router 192.168.72.1
+ dns-server 192.168.74.131
+exit
+
+ip route 192.168.72.0 255.255.254.0 26.48.75.98
+
+end
+write memory
+....................................................................................................
+R1
+
+enable
+configure terminal
+
+hostname R1
+no ip domain-lookup
+
+enable secret Class123
+username Admin secret Cisco123
+
+banner motd # ACCESO DENEGADO ANNIFER CARRASCO ORTIZ 20252648 SOLO PERSONAL AUTORIZADO #
+
+service password-encryption
+
+line console 0
+login local
+exec-timeout 10
+exit
+
+line vty 0 4
+login local
+exec-timeout 10
+transport input ssh
+exit
+
+ip domain-name campus.com
+ip ssh version 2
+crypto key generate rsa
+1024
+
+interface gig0/0/0
+descriotion CONECTADO A R3-DHCP
+ip address 26.48.75.102 255.255.255.252
+no shutdown
+exit
+
+interface gigabitEthernet0/0
+no shutdown
+exit
+
+interface gigabitEthernet0/0.300
+description VLAN 300
+encapsulation dot1Q 300
+ip address 26.48.64.2 255.255.248.0
+
+standby version 2
+standby 300 ip 26.48.64.1
+standby 300 priority 100
+standby 300 preempt
+standby 300 track gigabitEthernet0/1
+ip helper-address 26.48.75.101
+exit
+
+interface gigabitEthernet0/0.500
+description VLAN 500
+encapsulation dot1Q 500
+ip address 26.48.75.34 255.255.255.224
+
+standby version 2
+standby 500 ip 26.48.75.33
+standby 500 priority 100
+standby 500 preempt
+standby 500 track gigabitEthernet0/1
+ip helper-address 26.48.75.101
+exit
+
+ip route 26.48.74.128 255.255.255.128 26.48.75.101
+ip route 26.48.74.0 255.255.255.128 26.48.75.101
+ip route 26.48.75.0 255.255.255.224 26.48.75.101
+ip route 26.48.75.64 255.255.255.224 26.48.75.101
+ip route 26.48.72.0 255.255.254.0 26.48.75.101
+
+ip route 0.0.0.0 0.0.0.0 26.48.75.101
+
+end
+.......................................................................
+
+R2
+
+enable
+configure terminal
+
+hostname R2
+no ip domain-lookup
+
+enable secret Class123
+username Admin secret Cisco123
+
+banner motd # ACCESO DENEGADO ANNIFER CARRASCO ORTIZ 20252648 SOLO PERSONAL AUTORIZADO #
+
+service password-encryption
+
+line console 0
+login local
+exec-timeout 10
+exit
+
+line vty 0 4
+login local
+exec-timeout 10
+transport input ssh
+exit
+
+ip domain-name campus.com
+ip ssh version 2
+crypto key generate rsa
+1024
+
+interface gig0/1/0
+description CONECTADO A R3-DHCP
+ip address 26.48..75.106 255.255.255.252
+no shutdown
+exit
+
+interface gigabitEthernet0/1
+no shutdown
+exit
+
+interface gigabitEthernet0/1.300
+description VLAN 300
+encapsulation dot1Q 300
+ip address 26.48.64.3 255.255.248.0
+
+standby version 2
+standby 300 ip 26.48.64.1
+standby 300 priority 150
+standby 300 preempt
+standby 300 track gigabitEthernet0/0
+ip helper-address 26.48.75.105
+exit
+
+interface gigabitEthernet0/1.500
+description VLAN 500
+encapsulation dot1Q 500
+ip address 26.48.75.35 255.255.255.224
+
+standby version 2
+standby 500 ip 26.48.75.33
+standby 500 priority 150
+standby 500 preempt
+standby 500 track gigabitEthernet0/0
+ip helper-address 26.48.75.105
+exit
+
+ip route 26.48.74.128 255.255.255.128 26.48.75.105
+ip route 26.48.74.0 255.255.255.128 26.48.75.105
+ip route 26.48.75.0 255.255.255.224 26.48.75.105
+ip route 26.48.75.64 255.255.255.224 26.48.75.105
+ip route 26.48.72.0 255.255.254.0 26.48.75.105
+
+ip route 0.0.0.0 0.0.0.0 26.48.75.105
+
+end
+......................................................................................
+
+sw1
+
+enable
+configure terminal
+
+hostname SW1
+no ip domain-lookup
+
+enable secret Class123
+username Admin secret Cisco123
+
+banner motd # ACCESO DENEGADO ANNIFER CARRASCO ORTIZ 20252648 SOLO PERSONAL AUTORIZADO #
+
+service password-encryption
+
+vlan 300
+name DOCENTES-ESTUDIANTES
+exit
+
+vlan 500
+name ACADEMICOS
+exit
+
+vlan 999
+name NATIVA
+exit
+
+interface fastEthernet0/9
+switchport mode access
+switchport access vlan 500
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+interface gigabitEthernet0/1
+switchport mode trunk
+switchport trunk native vlan 999
+switchport trunk allowed vlan 300,500,999
+exit
+
+interface range fastEthernet0/23-24
+switchport mode trunk
+switchport trunk native vlan 999
+switchport trunk allowed vlan 300,500,999
+channel-group 1 mode active
+exit
+
+interface port-channel 1
+switchport mode trunk
+switchport trunk native vlan 999
+switchport trunk allowed vlan 300,500,999
+exit
+
+spanning-tree mode rapid-pvst
+spanning-tree vlan 300,500,999 root secondary
+
+end
+...........................................................................
+SW2
+
+enable
+configure terminal
+
+hostname SW2
+no ip domain-lookup
+
+enable secret Class123
+username Admin secret Cisco123
+
+banner motd # ACCESO DENEGADO ANNIFER CARRASCO ORTIZ 20252648 SOLO PERSONAL AUTORIZADO #
+
+service password-encryption
+
+vlan 300
+name DOCENTES-ESTUDIANTES
+exit
+
+vlan 500
+name ACADEMICOS
+exit
+
+vlan 999
+name NATIVA
+exit
+
+interface fastEthernet0/5
+switchport mode access
+switchport access vlan 300
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+
+interface gigabitEthernet0/1
+switchport mode trunk
+switchport trunk native vlan 999
+switchport trunk allowed vlan 300,500,999
+exit
+
+interface range fastEthernet0/23-24
+switchport mode trunk
+switchport trunk native vlan 999
+switchport trunk allowed vlan 300,500,999
+channel-group 1 mode active
+exit
+
+interface port-channel 1
+switchport mode trunk
+switchport trunk native vlan 999
+switchport trunk allowed vlan 300,500,999
+exit
+
+spanning-tree mode rapid-pvst
+spanning-tree vlan 300,500,999 root primary
+
+end
+........................................................................................
+
+SWC1
+
+enable
+configure terminal
+
+hostname SWC1
+no ip domain-lookup
+
+enable secret Class123
+
+username Admin secret Cisco123
+
+banner motd # ACCESO DENEGADO ANNIFER CARRASCO ORTIZ 20252648 SOLO PERSONAL AUTORIZADO #
+
+service password-encryption
+
+line console 0
+login local
+exec-timeout 10
+exit
+
+line vty 0 4
+login local
+exec-timeout 10
+transport input ssh
+exit
+
+ip domain-name campus.com
+ip ssh version 2
+crypto key generate rsa
+1024
+
+ip routing
+
+vlan 2
+name SERVIDORES
+exit
+
+vlan 3
+name EMPLEADOS
+exit
+
+vlan 4
+name FINANZAS
+exit
+
+vlan 5
+name TI
+exit
+
+vlan 6
+name WIFI
+exit
+
+vlan 7
+name NATIVA
+exit
+
+vlan 999
+name ADMIN-NATIVA
+exit
+
+interface gigabitEthernet1/1/1
+no switchport
+description ENLACE-P2P-R3-DHCP
+ip address 26.48.75.98 255.255.255.252
+no shutdown
+exit
+
+interface vlan 2
+description SERVIDORES
+ip address 26.48.74.129 255.255.255.128
+ip helper-address 26.48.75.97
+no shutdown
+exit
+
+interface vlan 3
+description EMPLEADOS
+ip address 26.48.74.1 255.255.255.128
+ip helper-address 26.48.75.97
+no shutdown
+exit
+
+interface vlan 4
+description FINANZAS
+ip address 26.48.75.1 255.255.255.224
+ip helper-address 26.48.75.97
+no shutdown
+exit
+
+interface vlan 5
+description TI
+ip address 26.48.75.65 255.255.255.224
+ip helper-address 26.48.75.97
+no shutdown
+exit
+
+interface vlan 6
+description WIFI
+ip address 26.48.72.1 255.255.254.0
+ip helper-address 26.48.75.97
+no shutdown
+exit
+
+interface range gigabitEthernet1/0/22-23
+switchport mode trunk
+switchport trunk native vlan 7
+switchport trunk allowed vlan 2,3,4,5,6,7
+channel-group 2 mode active
+exit
+
+interface port-channel 2
+switchport mode trunk
+switchport trunk native vlan 7
+switchport trunk allowed vlan 2,3,4,5,6,7
+exit
+
+interface gigabitEthernet1/0/24
+description TRUNK-HACIA-SW4
+switchport mode trunk
+switchport trunk native vlan 7
+switchport trunk allowed vlan 2,3,4,5,6,7
+no shutdown
+exit
+
+ip route 0.0.0.0 0.0.0.0 26.48.75.97
+
+interface range gigabitEthernet1/0/22-23
+ shutdown
+ no channel-group 2
+exit
+
+no interface port-channel 2
+
+interface range gigabitEthernet1/0/22-23
+ switchport mode trunk
+ switchport trunk native vlan 7
+ switchport trunk allowed vlan 2,3,4,5,6,7
+ channel-group 2 mode active
+ no shutdown
+exit
+
+interface port-channel 2
+ switchport mode trunk
+ switchport trunk native vlan 7
+ switchport trunk allowed vlan 2,3,4,5,6,7
+ no shutdown
+exit
+
+
+interface vlan 7
+ description ADMIN-WLC
+ ip address 192.168.72.1 255.255.254.0
+ no shutdown
+exit
+
+interface vlan 7
+ description ADMIN-WLC
+ ip address 192.168.72.1 255.255.254.0
+ ip helper-address 26.48.75.97
+ no shutdown
+exit
+
+interface gigabitEthernet1/0/24
+ description TRUNK-HACIA-SW4
+ switchport mode trunk
+ switchport trunk native vlan 7
+ switchport trunk allowed vlan 2,3,4,5,6,7
+ no shutdown
+exit
+
+end
+write memory
+.............................................................................
+
+SW3
+
+enable
+configure terminal
+
+hostname SW3
+no ip domain-lookup
+
+enable secret Class123
+username Admin secret Cisco123
+
+banner motd # ACCESO DENEGADO ANNIFER CARRASCO ORTIZ 20252648 SOLO PERSONAL AUTORIZADO #
+
+service password-encryption
+
+vlan 2
+name SERVIDORES
+exit
+
+vlan 3
+name EMPLEADOS
+exit
+
+vlan 4
+name FINANZAS
+exit
+
+vlan 5
+name TI
+exit
+
+vlan 6
+name WIFI
+exit
+
+vlan 7
+name NATIVA
+exit
+
+interface range gigabitEthernet0/1-2
+switchport mode trunk
+switchport trunk native vlan 7
+switchport trunk allowed vlan 2,3,4,5,6,7
+channel-group 2 mode active
+exit
+
+interface port-channel 2
+switchport mode trunk
+switchport trunk native vlan 7
+switchport trunk allowed vlan 2,3,4,5,6,7
+exit
+
+interface range fastEthernet0/1-3
+switchport mode access
+switchport access vlan 2
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+interface range fastEthernet0/4-8
+switchport mode access
+switchport access vlan 3
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+interface range fastEthernet0/9-11
+switchport mode access
+switchport access vlan 4
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+interface range fastEthernet0/12-13
+switchport mode access
+switchport access vlan 5
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+interface range fastEthernet0/14-18
+switchport mode access
+switchport access vlan 6
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+interface range fastEthernet0/1-18
+switchport port-security
+switchport port-security maximum 2
+switchport port-security violation shutdown
+switchport port-security mac-address sticky
+exit
+
+interface range gigabitEthernet0/1-2
+ shutdown
+ no channel-group 2
+exit
+
+no interface port-channel 2
+
+interface range gigabitEthernet0/1-2
+ switchport mode trunk
+ switchport trunk native vlan 7
+ switchport trunk allowed vlan 2,3,4,5,6,7
+ channel-group 2 mode active
+ no shutdown
+exit
+
+interface port-channel 2
+ switchport mode trunk
+ switchport trunk native vlan 7
+ switchport trunk allowed vlan 2,3,4,5,6,7
+ no shutdown
+exit
+
+end
+write memory
+........................................................................
+
+SW4
+enable
+configure terminal
+
+hostname SW4
+no ip domain-lookup
+
+enable secret Class123
+username Admin secret Cisco123
+
+banner motd # ACCESO DENEGADO ANNIFER CARRASCO ORTIZ 20252648 SOLO PERSONAL AUTORIZADO #
+
+service password-encryption
+
+
+vlan 2
+name SERVIDORES
+exit
+
+vlan 3
+name EMPLEADOS
+exit
+
+vlan 4
+name FINANZAS
+exit
+
+vlan 5
+name TI
+exit
+
+vlan 6
+name WIFI
+exit
+
+vlan 7
+name NATIVA
+exit
+
+interface gigabitEthernet0/1
+description TRUNK-HACIA-SWC1
+switchport mode trunk
+switchport trunk native vlan 7
+switchport trunk allowed vlan 2,3,4,5,6,7
+no shutdown
+exit
+
+interface gigabitEthernet0/2
+ description CONECTADO-AL-WLC
+ switchport mode access
+ switchport access vlan 7
+ spanning-tree portfast
+ no shutdown
+exit
+
+interface gigabitEthernet0/1
+ description CONECTADO-AL-WLC
+ switchport mode access
+ switchport access vlan 7
+ spanning-tree portfast
+ no shutdown
+exit
+
+interface gigabitEthernet0/1
+ description TRUNK-HACIA-SWC1
+ switchport mode trunk
+ switchport trunk native vlan 7
+ switchport trunk allowed vlan 2,3,4,5,6,7
+ no shutdown
+exit
+
+interface gigabitEthernet0/2
+ description CONECTADO-AL-WLC
+ switchport mode access
+ switchport access vlan 7
+ spanning-tree portfast
+ no shutdown
+exit
+
+interface range fastEthernet0/2-3
+ description AP-BIBLIOTECA-Y-LOBBY
+ switchport mode access
+ switchport access vlan 7
+ spanning-tree portfast
+ no shutdown
+exit
+
+end
+write memory
+...............................
+ISP
+
+enable
+configure terminal
+
+hostname ISP
+
+interface gigabitEthernet0/0/0
+description HACIA R3-DHCP
+ip address 209.165.200.226 255.255.255.248
+no shutdown
+exit
+
+interface gigabitEthernet0/0
+description HACIA GOOGLE
+ip address 8.8.8.1 255.255.255.0
+no shutdown
+exit
+
+ip route 26.48.64.0 255.255.248.0 209.165.200.225
+ip route 26.48.75.32 255.255.255.224 209.165.200.225
+ip route 26.48.74.0 255.255.254.0 209.165.200.225
+ip route 26.48.75.0 255.255.255.192 209.165.200.225
+ip route 26.48.72.0 255.255.254.0 209.165.200.225
+
+end
+.........................
