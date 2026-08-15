@@ -1,4 +1,5 @@
 R3-DHCP
+configuración básica, donde ponemos contraseñas, agregamos banner, y encriptamos
 
 enable
 configure terminal
@@ -30,6 +31,8 @@ ip ssh version 2
 crypto key generate rsa
 1024
 
+Agregamos las ip correspondientes a nuestras interfaces
+
 interface gigabitEthernet0/0/0
 description CONECTADO A R1
 ip address 26.48.75.101 255.255.255.252
@@ -53,6 +56,8 @@ description CONECTADO AL ISP
 ip address 209.165.200.225 255.255.255.248
 no shutdown
 exit
+
+creamos nuestros pool para cada vlan para que asi manden ip por dhcp a los dispositivos correspondientes
 
 ip dhcp excluded-address 26.48.74.129
 ip dhcp excluded-address 26.48.74.250 26.48.74.254
@@ -117,6 +122,8 @@ default-router 26.48.75.33
 dns-server 26.48.74.131
 exit
 
+creamos nuestra ruta estatica para que nuestro router tenga conecccion con las demas redes por medio de saltos
+
 ip route 26.48.74.128 255.255.255.128 26.48.75.98
 ip route 26.48.74.0 255.255.255.128 26.48.75.98
 ip route 26.48.75.0 255.255.255.224 26.48.75.98
@@ -143,6 +150,8 @@ end
 write memory
 ....................................................................................................
 R1
+
+hacemos nuestra configuracion basica nuevamente
 
 enable
 configure terminal
@@ -172,6 +181,8 @@ ip domain-name campus.com
 ip ssh version 2
 crypto key generate rsa
 1024
+
+ponemos nuestras ip correspondientes
 
 interface gig0/0/0
 descriotion CONECTADO A R3-DHCP
@@ -209,6 +220,9 @@ standby 500 track gigabitEthernet0/1
 ip helper-address 26.48.75.101
 exit
 
+asignamos nuestras rutas estaticas
+
+
 ip route 26.48.74.128 255.255.255.128 26.48.75.101
 ip route 26.48.74.0 255.255.255.128 26.48.75.101
 ip route 26.48.75.0 255.255.255.224 26.48.75.101
@@ -221,6 +235,8 @@ end
 .......................................................................
 
 R2
+
+nuestra configuración basica
 
 enable
 configure terminal
@@ -250,6 +266,8 @@ ip domain-name campus.com
 ip ssh version 2
 crypto key generate rsa
 1024
+
+Asignamos nuestras ip correspondientes a cada interfaces
 
 interface gig0/1/0
 description CONECTADO A R3-DHCP
@@ -287,6 +305,8 @@ standby 500 track gigabitEthernet0/0
 ip helper-address 26.48.75.105
 exit
 
+configuramos nuestra ruta estática 
+
 ip route 26.48.74.128 255.255.255.128 26.48.75.105
 ip route 26.48.74.0 255.255.255.128 26.48.75.105
 ip route 26.48.75.0 255.255.255.224 26.48.75.105
@@ -300,6 +320,8 @@ end
 
 sw1
 
+Configuramos nuestra configuracion basica
+
 enable
 configure terminal
 
@@ -312,6 +334,8 @@ username Admin secret Cisco123
 banner motd # ACCESO DENEGADO ANNIFER CARRASCO ORTIZ 20252648 SOLO PERSONAL AUTORIZADO #
 
 service password-encryption
+
+Creamos nuestras vlans 300, 500 y 999
 
 vlan 300
 name DOCENTES-ESTUDIANTES
@@ -358,6 +382,8 @@ end
 ...........................................................................
 SW2
 
+nuestra configuracion basica
+
 enable
 configure terminal
 
@@ -370,6 +396,8 @@ username Admin secret Cisco123
 banner motd # ACCESO DENEGADO ANNIFER CARRASCO ORTIZ 20252648 SOLO PERSONAL AUTORIZADO #
 
 service password-encryption
+
+creamos nuestras vlans 300, 500 y 999 y nombramos
 
 vlan 300
 name DOCENTES-ESTUDIANTES
@@ -418,6 +446,8 @@ end
 
 SWC1
 
+confi básica y ssh
+
 enable
 configure terminal
 
@@ -427,6 +457,7 @@ no ip domain-lookup
 enable secret Class123
 
 username Admin secret Cisco123
+username 20252648 secret Cisco123
 
 banner motd # ACCESO DENEGADO ANNIFER CARRASCO ORTIZ 20252648 SOLO PERSONAL AUTORIZADO #
 
